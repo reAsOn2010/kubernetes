@@ -25,6 +25,7 @@ import (
 	"k8s.io/kubernetes/pkg/serviceaccount"
 	"k8s.io/kubernetes/pkg/util/crypto"
 	"k8s.io/kubernetes/plugin/pkg/auth/authenticator/password/keystone"
+	"k8s.io/kubernetes/plugin/pkg/auth/authenticator/password/ldap"
 	"k8s.io/kubernetes/plugin/pkg/auth/authenticator/password/passwordfile"
 	"k8s.io/kubernetes/plugin/pkg/auth/authenticator/request/basicauth"
 	"k8s.io/kubernetes/plugin/pkg/auth/authenticator/request/union"
@@ -47,6 +48,8 @@ type AuthenticatorConfig struct {
 	ServiceAccountLookup        bool
 	ServiceAccountTokenGetter   serviceaccount.ServiceAccountTokenGetter
 	KeystoneURL                 string
+	LdapURL                     string
+	LdapBaseDn                  string
 	WebhookTokenAuthnConfigFile string
 	WebhookTokenAuthnCacheTTL   time.Duration
 }
@@ -102,6 +105,14 @@ func New(config AuthenticatorConfig) (authenticator.Request, error) {
 			return nil, err
 		}
 		authenticators = append(authenticators, keystoneAuth)
+	}
+
+	if len(config.LdapURL) > 0 {
+		ldapAuth, err := newLdapAuthenticator(config.LdapURL, config.LdapBaseDn)
+		if err != nil {
+			return nil, err
+		}
+		authenticators = append(authenticators, ldapAuth)
 	}
 
 	if len(config.WebhookTokenAuthnConfigFile) > 0 {
@@ -198,6 +209,15 @@ func newAuthenticatorFromKeystoneURL(keystoneURL string) (authenticator.Request,
 	}
 
 	return basicauth.New(keystoneAuthenticator), nil
+}
+
+func newLdapAuthenticator(ldapURL, ldapBaseDn string) (authenticator.Request, error) {
+	ldapAuthenticator, err := ldap.New(ldapURL, ldapBaseDn)
+	if err != nil {
+		return nil, err
+	}
+
+	return basicauth.New(ldapAuthenticator), nil
 }
 
 func newWebhookTokenAuthenticator(webhookConfigFile string, ttl time.Duration) (authenticator.Request, error) {

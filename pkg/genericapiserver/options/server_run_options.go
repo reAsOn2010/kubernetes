@@ -77,6 +77,8 @@ type ServerRunOptions struct {
 	InsecurePort              int
 	KeystoneURL               string
 	KubernetesServiceNodePort int
+	LdapBaseDn                string
+	LdapURL                   string
 	LongRunningRequestRE      string
 	MasterCount               int
 	MasterServiceNamespace    string
@@ -281,6 +283,10 @@ func (s *ServerRunOptions) AddFlags(fs *pflag.FlagSet) {
 
 	// See #14282 for details on how to test/try this option out.  TODO remove this comment once this option is tested in CI.
 	fs.IntVar(&s.KubernetesServiceNodePort, "kubernetes-service-node-port", s.KubernetesServiceNodePort, "If non-zero, the Kubernetes master service (which apiserver creates/maintains) will be of type NodePort, using this as the value of the port. If zero, the Kubernetes master service will be of type ClusterIP.")
+
+	fs.StringVar(&s.LdapBaseDn, "ldap-base-dn", s.LdapBaseDn, "DN searched by ldap authentication plugin (e.g., cn=%s,dc=example,dc=org). The plugin will search OU as groups ")
+
+	fs.StringVar(&s.LdapURL, "ldap-url", s.LdapURL, "If passed, activates ldap authentication plugin")
 
 	fs.StringVar(&s.LongRunningRequestRE, "long-running-request-regexp", s.LongRunningRequestRE, "A regular expression matching long running requests which should be excluded from maximum inflight request handling.")
 

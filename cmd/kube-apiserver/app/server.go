@@ -198,6 +198,8 @@ func Run(s *options.APIServer) error {
 		ServiceAccountLookup:        s.ServiceAccountLookup,
 		ServiceAccountTokenGetter:   serviceAccountGetter,
 		KeystoneURL:                 s.KeystoneURL,
+		LdapURL:                     s.LdapURL,
+		LdapBaseDn:                  s.LdapBaseDn,
 		WebhookTokenAuthnConfigFile: s.WebhookTokenAuthnConfigFile,
 		WebhookTokenAuthnCacheTTL:   s.WebhookTokenAuthnCacheTTL,
 	})
